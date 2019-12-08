@@ -1,10 +1,10 @@
-import time
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 
 
 class LoginPage:
 
-    URL = 'https://www.humanity.com/app/'
     INPUT_USER = (By.ID, 'email')
     INPUT_PASSWORD = (By.ID, 'password')
     DIV_MESSAGE = (By.ID, 'response-message')
@@ -14,22 +14,24 @@ class LoginPage:
                  browser):
         self.browser = browser
 
-    def load(self):
-        self.browser.get(self.URL)
+    def load(self,
+             url):
+        self.browser.get(url)
 
-    def signin(self,
-               username,
-               password):
+    def fill_username(self,
+                      username):
 
-        username_input = self.browser.find_element(*self.INPUT_USER)
-        username_input.send_keys(username)
-        password_input = self.browser.find_element(*self.INPUT_PASSWORD)
-        password_input.send_keys(password)
-        login_button = self.browser.find_element(*self.BUTTON_LOGIN)
-        login_button.click()
-        message_div = self.browser.find_element(*self.DIV_MESSAGE)
+        WebDriverWait(self.browser, 1).until(ec.visibility_of_element_located(self.INPUT_USER)).send_keys(username)
 
-        time.sleep(3)
+    def fill_password(self,
+                      password):
+        WebDriverWait(self.browser, 1).until(ec.visibility_of_element_located(self.INPUT_PASSWORD)).send_keys(password)
 
-        return message_div.get_attribute('innerHTML').lower()
+    def click_login(self):
+        WebDriverWait(self.browser, 1).until(ec.visibility_of_element_located(self.BUTTON_LOGIN)).click()
 
+    def check_login_message(self,
+                            text):
+        return WebDriverWait(self.browser, 3,
+                             poll_frequency=0.5).until(ec.text_to_be_present_in_element(self.DIV_MESSAGE,
+                                                                                        text))
